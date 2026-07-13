@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>رحلة الإنجاز</title>
+  <style>
+    :root{
+      --emerald:#0d6b52;
+      --emerald-2:#118a67;
+      --emerald-3:#e8f6f1;
+      --gold:#d4af37;
+      --gold-2:#f5e7ac;
+      --ink:#16342d;
+      --muted:#71827d;
+      --white:#ffffff;
+      --line:#dfe9e5;
+      --danger:#b42318;
+      --shadow:0 12px 35px rgba(13,107,82,.10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Tajawal","Cairo",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(212,175,55,.12), transparent 26%),
+        linear-gradient(180deg,#f9fcfb 0%,#f4f8f6 100%);
+      color:var(--ink);
+      min-height:100vh;
+    }
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .container{width:min(1220px,92%);margin:auto}
+    header{
+      background:linear-gradient(135deg,#075540,#0c7659 62%,#0a624b);
+      color:#fff;
+      padding:28px 0 34px;
+      position:relative;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    header::after{
+      content:"";
+      position:absolute;
+      width:360px;height:360px;border:1px solid rgba(212,175,55,.35);
+      border-radius:50%;left:-100px;top:-220px;
+      box-shadow:0 0 0 28px rgba(212,175,55,.05),0 0 0 58px rgba(212,175,55,.03);
+    }
+    .header-row{display:flex;justify-content:space-between;align-items:center;gap:18px;position:relative;z-index:1}
+    .brand h1{margin:0;font-size:clamp(29px,5vw,48px);letter-spacing:.2px}
+    .brand p{margin:8px 0 0;color:#dff5ed}
+    .mode-switch{
+      display:flex;gap:8px;background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.22);padding:6px;border-radius:16px;
+      backdrop-filter:blur(8px)
+    }
+    .mode-switch button{
+      border:0;border-radius:11px;padding:10px 14px;background:transparent;color:#fff;font-weight:700
+    }
+    .mode-switch button.active{background:#fff;color:var(--emerald)}
+    main{padding:26px 0 50px}
+    .stats{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:-10px
+    }
+    .stat{
+      background:#fff;border:1px solid var(--line);border-radius:18px;padding:19px;
+      box-shadow:var(--shadow);position:relative;overflow:hidden
+    }
+    .stat::before{content:"";position:absolute;inset:auto 0 0;height:4px;background:linear-gradient(90deg,var(--emerald),var(--gold))}
+    .stat .label{font-size:14px;color:var(--muted);margin-bottom:8px}
+    .stat .value{font-size:30px;font-weight:800;color:var(--emerald)}
+    .stage-stats{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0 0}
+    .stage-chip{background:#fff;border:1px solid var(--line);padding:8px 11px;border-radius:999px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.035)}
+    .toolbar{
+      display:grid;grid-template-columns:1fr auto;gap:12px;margin:24px 0 18px;align-items:center
+    }
+    .search-wrap{position:relative}
+    .search-wrap input{
+      width:100%;border:1px solid var(--line);background:#fff;border-radius:15px;
+      padding:14px 44px 14px 15px;outline:none;box-shadow:0 6px 20px rgba(13,107,82,.05)
+    }
+    .search-wrap span{position:absolute;right:15px;top:50%;transform:translateY(-50%)}
+    .actions{display:flex;flex-wrap:wrap;gap:8px}
+    .btn{
+      border:1px solid var(--line);background:#fff;color:var(--ink);padding:11px 14px;border-radius:12px;font-weight:700
+    }
+    .btn.primary{background:var(--emerald);color:#fff;border-color:var(--emerald)}
+    .btn.gold{background:var(--gold);color:#2e270f;border-color:var(--gold)}
+    .btn.danger{color:var(--danger)}
+    .students{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px
+    }
+    .student-card{
+      background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;
+      box-shadow:var(--shadow);transition:.25s
+    }
+    .student-card:hover{transform:translateY(-2px)}
+    .student-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}
+    .student-info{display:flex;align-items:center;gap:12px}
+    .quran-icon{
+      width:52px;height:52px;display:grid;place-items:center;border-radius:16px;
+      background:linear-gradient(145deg,var(--gold-2),#fff4c8);font-size:27px;border:1px solid #ead78a
+    }
+    .student-name{font-size:19px;font-weight:800}
+    .student-stage{font-size:13px;color:var(--emerald-2);margin-top:4px}
+    .journey{
+      display:flex;align-items:center;gap:7px;overflow-x:auto;padding:8px 2px 12px;scrollbar-width:thin
+    }
+    .stage{
+      flex:0 0 122px;min-height:72px;border-radius:15px;border:1px solid var(--line);
+      padding:10px 8px;text-align:center;display:grid;place-items:center;background:#f7faf9;
+      color:#7b8a86;font-size:13px;font-weight:700;transition:.25s
+    }
+    .stage.done{background:#fff9e4;border-color:#e8d17b;color:#715d13}
+    .stage.current{
+      background:linear-gradient(145deg,var(--emerald),var(--emerald-2));
+      color:#fff;border-color:transparent;box-shadow:0 0 0 4px rgba(17,138,103,.12),0 10px 24px rgba(13,107,82,.24);
+      animation:pulse 1.8s infinite
+    }
+    .arrow{color:var(--gold);font-size:20px;flex:0 0 auto}
+    @keyframes pulse{50%{box-shadow:0 0 0 8px rgba(17,138,103,.05),0 12px 26px rgba(13,107,82,.22)}}
+    .teacher-controls{display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid var(--line);padding-top:14px;margin-top:4px}
+    .teacher-controls button{flex:1;min-width:120px}
+    .hidden{display:none!important}
+    .empty{grid-column:1/-1;background:#fff;border:1px dashed var(--line);border-radius:18px;text-align:center;padding:40px;color:var(--muted)}
+    .modal{
+      position:fixed;inset:0;background:rgba(4,35,27,.56);display:grid;place-items:center;
+      padding:18px;z-index:1000
+    }
+    .modal-card{
+      width:min(620px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;
+      box-shadow:0 25px 70px rgba(0,0,0,.25);padding:22px
+    }
+    .modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+    .modal-head h2{margin:0}
+    .close{border:0;background:#eef4f2;width:38px;height:38px;border-radius:10px}
+    .field{margin-bottom:14px}
+    .field label{display:block;margin-bottom:6px;font-weight:700}
+    .field input{
+      width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;outline:none
+    }
+    .stage-edit-row{display:flex;gap:8px;margin-bottom:8px}
+    .stage-edit-row input{flex:1}
+    .modal-actions{display:flex;justify-content:flex-start;gap:8px;margin-top:18px}
+    .celebration{text-align:center}
+    .celebration .cup{font-size:70px}
+    .celebration h2{color:var(--emerald);font-size:27px}
+    .progress{
+      height:10px;background:#e8efec;border-radius:999px;overflow:hidden;margin-top:10px
+    }
+    .progress span{display:block;height:100%;background:linear-gradient(90deg,var(--emerald),var(--gold));transition:.4s}
+    canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:2000}
+    footer{text-align:center;color:var(--muted);padding:20px}
+    @media(max-width:900px){
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .students{grid-template-columns:1fr}
+      .toolbar{grid-template-columns:1fr}
+      .header-row{align-items:flex-start;flex-direction:column}
+    }
+    @media(max-width:540px){
+      .stats{grid-template-columns:1fr 1fr}
+      .stat{padding:14px}
+      .stat .value{font-size:24px}
+      .mode-switch{width:100%}
+      .mode-switch button{flex:1}
+      .actions{display:grid;grid-template-columns:1fr 1fr}
+      .actions .btn{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <header>
+    <div class="container header-row">
+      <div class="brand">
+        <h1>🏆 رحلة الإنجاز</h1>
+        <p>رحلة مباركة من الجدّ إلى التميّز</p>
+      </div>
+      <div class="mode-switch" aria-label="اختيار الوضع">
+        <button id="teacherModeBtn" class="active">👩‍🏫 وضع المعلمة</button>
+        <button id="displayModeBtn">👀 وضع العرض</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="stats">
+      <div class="stat"><div class="label">عدد الطالبات</div><div class="value" id="studentCount">0</div></div>
+      <div class="stat"><div class="label">وصلن إلى الكأس</div><div class="value" id="cupCount">0</div></div>
+      <div class="stat"><div class="label">نسبة الإنجاز العامة</div><div class="value" id="completionRate">0%</div><div class="progress"><span id="progressBar" style="width:0"></span></div></div>
+      <div class="stat"><div class="label">الموجودات في المرحلة الحالية الأولى</div><div class="value" id="firstStageCount">0</div></div>
+    </section>
+
+    <div id="stageStats" class="stage-stats"></div>
+
+    <section class="toolbar">
+      <div class="search-wrap">
+        <span>🔎</span>
+        <input id="searchInput" type="search" placeholder="ابحثي عن طالبة..." />
+      </div>
+      <div class="actions teacher-only">
+        <button class="btn primary" id="addStudentBtn">➕ إضافة طالبة</button>
+        <button class="btn" id="settingsBtn">⚙️ الإعدادات</button>
+        <button class="btn" id="exportBtn">📤 تصدير</button>
+        <button class="btn" id="importBtn">📥 استيراد</button>
+        <input id="importFile" type="file" accept=".json,application/json" hidden />
+      </div>
+    </section>
+
+    <section id="studentsGrid" class="students"></section>
+  </main>
+
+  <footer>تُحفظ البيانات تلقائيًا على هذا الجهاز.</footer>
+
+  <div id="studentModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head"><h2>إضافة طالبة جديدة</h2><button class="close" data-close="studentModal">✕</button></div>
+      <div class="field"><label for="studentNameInput">اسم الطالبة</label><input id="studentNameInput" placeholder="اكتبي الاسم هنا" /></div>
+      <div class="modal-actions"><button class="btn primary" id="saveStudentBtn">حفظ</button></div>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head"><h2>إعدادات المراحل</h2><button class="close" data-close="settingsModal">✕</button></div>
+      <div id="stagesEditor"></div>
+      <button class="btn" id="addStageBtn">➕ إضافة مرحلة</button>
+      <div class="field" style="margin-top:18px">
+        <label><input type="checkbox" id="soundToggle" /> تشغيل صوت بسيط عند الوصول للكأس</label>
+      </div>
+      <div class="modal-actions"><button class="btn primary" id="saveSettingsBtn">حفظ الإعدادات</button></div>
+    </div>
+  </div>
+
+  <div id="celebrationModal" class="modal hidden">
+    <div class="modal-card celebration">
+      <div class="cup">🏆</div>
+      <h2>بارك الله فيكِ، وصلتِ إلى الكأس.</h2>
+      <p id="celebrationName"></p>
+      <button class="btn gold" data-close="celebrationModal">ما شاء الله</button>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const DEFAULT_STAGES = [
+    "الحفظ الجديد",
+    "السرد القديم",
+    "الاستماع للقارئ",
+    "قراءة السورة ×10",
+    "حضور الدرس",
+    "🏆 الكأس"
+  ];
+
+  const DEFAULT_STUDENTS = [
+    "آمنة العميمي","أسماء آل علي","حصة الكعبي","حصة ماجد","حصة ناصر",
+    "حليمة العامري","دانة الطنيجي","زلفا الكعبي","شما المرزوقي",
+    "عائشة الحوسني","عائشة العزيزي","غاية محمد","مريم الزعابي",
+    "مريم المهري","نورة الشامسي","نوف عيسى","هند الحمودي"
+  ].map((name, index) => ({ id: Date.now() + index, name, stage: 0 }));
+
+  const KEY = "rehlat-alinjaz-v1";
+  let state = loadState();
+  let mode = "teacher";
+
+  const el = id => document.getElementById(id);
+
+  function loadState(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(KEY));
+      if(saved && Array.isArray(saved.students) && Array.isArray(saved.stages)) return saved;
+    }catch(e){}
+    return { students: DEFAULT_STUDENTS, stages: DEFAULT_STAGES, sound: false };
+  }
+
+  function saveState(){
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+
+  function escapeHtml(text){
+    return String(text).replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  function render(){
+    renderStats();
+    renderStudents();
+    saveState();
+  }
+
+  function renderStats(){
+    const total = state.students.length;
+    const last = state.stages.length - 1;
+    const cup = state.students.filter(s => s.stage === last).length;
+    const maxProgress = Math.max(1, total * last);
+    const sum = state.students.reduce((a,s) => a + Math.min(s.stage,last),0);
+    const rate = total ? Math.round((sum / maxProgress) * 100) : 0;
+
+    el("studentCount").textContent = total;
+    el("cupCount").textContent = cup;
+    el("completionRate").textContent = rate + "%";
+    el("progressBar").style.width = rate + "%";
+    el("firstStageCount").textContent = state.students.filter(s => s.stage === 0).length;
+
+    el("stageStats").innerHTML = state.stages.map((st,i) => {
+      const count = state.students.filter(s => s.stage === i).length;
+      return `<span class="stage-chip">${escapeHtml(st)}: <strong>${count}</strong></span>`;
+    }).join("");
+  }
+
+  function renderStudents(){
+    const query = el("searchInput").value.trim().toLowerCase();
+    const list = state.students.filter(s => s.name.toLowerCase().includes(query));
+    const grid = el("studentsGrid");
+
+    if(!list.length){
+      grid.innerHTML = `<div class="empty">لا توجد نتائج مطابقة.</div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(student => {
+      const stages = state.stages.map((stageName,index) => {
+        const cls = index < student.stage ? "done" : index === student.stage ? "current" : "";
+        const check = index < student.stage ? " ✓" : "";
+        const stage = `<div class="stage ${cls}">${escapeHtml(stageName)}${check}</div>`;
+        return index < state.stages.length - 1 ? stage + `<span class="arrow">➜</span>` : stage;
+      }).join("");
+
+      return `
+        <article class="student-card">
+          <div class="student-head">
+            <div class="student-info">
+              <div class="quran-icon">📖</div>
+              <div>
+                <div class="student-name">${escapeHtml(student.name)}</div>
+                <div class="student-stage">المرحلة الحالية: ${escapeHtml(state.stages[student.stage] || "")}</div>
+              </div>
+            </div>
+          </div>
+          <div class="journey">${stages}</div>
+          <div class="teacher-controls teacher-only">
+            <button class="btn primary" data-action="next" data-id="${student.id}">➕ المرحلة التالية</button>
+            <button class="btn" data-action="prev" data-id="${student.id}">➖ المرحلة السابقة</button>
+            <button class="btn" data-action="reset" data-id="${student.id}">🔄 إعادة للبداية</button>
+            <button class="btn danger" data-action="delete" data-id="${student.id}">🗑 حذف</button>
+          </div>
+        </article>`;
+    }).join("");
+
+    applyMode();
+  }
+
+  function applyMode(){
+    document.querySelectorAll(".teacher-only").forEach(node => {
+      node.classList.toggle("hidden", mode !== "teacher");
+    });
+    el("teacherModeBtn").classList.toggle("active", mode === "teacher");
+    el("displayModeBtn").classList.toggle("active", mode === "display");
+  }
+
+  function moveStudent(id, action){
+    const student = state.students.find(s => s.id === id);
+    if(!student) return;
+    const last = state.stages.length - 1;
+    const before = student.stage;
+
+    if(action === "next") student.stage = Math.min(last, student.stage + 1);
+    if(action === "prev") student.stage = Math.max(0, student.stage - 1);
+    if(action === "reset") student.stage = 0;
+    if(action === "delete"){
+      if(confirm(`هل تريدين حذف ${student.name}؟`)){
+        state.students = state.students.filter(s => s.id !== id);
+      }
+    }
+
+    render();
+
+    if(action === "next" && before < last && student.stage === last){
+      celebrate(student.name);
+    }
+  }
+
+  function celebrate(name){
+    el("celebrationName").textContent = name;
+    el("celebrationModal").classList.remove("hidden");
+    launchConfetti();
+    if(state.sound) playTone();
+  }
+
+  function playTone(){
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [523,659,784,1046].forEach((freq,i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(.0001, ctx.currentTime + i*.12);
+        gain.gain.exponentialRampToValueAtTime(.18, ctx.currentTime + i*.12 + .02);
+        gain.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + i*.12 + .28);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(ctx.currentTime + i*.12);
+        osc.stop(ctx.currentTime + i*.12 + .3);
+      });
+    }catch(e){}
+  }
+
+  function launchConfetti(){
+    const canvas = el("confetti");
+    const ctx = canvas.getContext("2d");
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+    const pieces = Array.from({length:150}, () => ({
+      x: Math.random()*canvas.width,
+      y: -20-Math.random()*canvas.height*.35,
+      r: 3+Math.random()*6,
+      vy: 2+Math.random()*4,
+      vx: -2+Math.random()*4,
+      rot: Math.random()*Math.PI
+    }));
+    const colors = ["#0d6b52","#d4af37","#ffffff","#e56b6f","#5fa8d3"];
+    let frame=0;
+    function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      pieces.forEach((p,i) => {
+        p.x += p.vx; p.y += p.vy; p.rot += .08;
+        ctx.save();
+        ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+        ctx.fillStyle = colors[i%colors.length];
+        ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);
+        ctx.restore();
+      });
+      frame++;
+      if(frame < 220) requestAnimationFrame(draw);
+      else ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+    draw();
+  }
+
+  function openModal(id){ el(id).classList.remove("hidden"); }
+  function closeModal(id){ el(id).classList.add("hidden"); }
+
+  el("teacherModeBtn").onclick = () => { mode="teacher"; applyMode(); };
+  el("displayModeBtn").onclick = () => { mode="display"; applyMode(); };
+  el("searchInput").addEventListener("input", renderStudents);
+
+  el("studentsGrid").addEventListener("click", e => {
+    const btn = e.target.closest("[data-action]");
+    if(!btn || mode !== "teacher") return;
+    moveStudent(Number(btn.dataset.id), btn.dataset.action);
+  });
+
+  el("addStudentBtn").onclick = () => {
+    el("studentNameInput").value = "";
+    openModal("studentModal");
+    setTimeout(() => el("studentNameInput").focus(), 50);
+  };
+
+  el("saveStudentBtn").onclick = () => {
+    const name = el("studentNameInput").value.trim();
+    if(!name) return alert("اكتبي اسم الطالبة.");
+    state.students.push({id: Date.now(), name, stage:0});
+    closeModal("studentModal");
+    render();
+  };
+
+  el("settingsBtn").onclick = () => {
+    el("stagesEditor").innerHTML = state.stages.map((s,i) => `
+      <div class="stage-edit-row">
+        <input value="${escapeHtml(s)}" data-stage-index="${i}" />
+        <button class="btn danger" data-remove-stage="${i}" ${state.stages.length<=2 ? "disabled":""}>حذف</button>
+      </div>`).join("");
+    el("soundToggle").checked = !!state.sound;
+    openModal("settingsModal");
+  };
+
+  el("addStageBtn").onclick = () => {
+    const editor = el("stagesEditor");
+    const index = editor.querySelectorAll("[data-stage-index]").length;
+    editor.insertAdjacentHTML("beforeend", `
+      <div class="stage-edit-row">
+        <input value="مرحلة جديدة" data-stage-index="${index}" />
+        <button class="btn danger" data-remove-stage="${index}">حذف</button>
+      </div>`);
+  };
+
+  el("stagesEditor").addEventListener("click", e => {
+    const btn = e.target.closest("[data-remove-stage]");
+    if(!btn) return;
+    if(el("stagesEditor").querySelectorAll(".stage-edit-row").length <= 2) return alert("يجب أن تبقى مرحلتان على الأقل.");
+    btn.closest(".stage-edit-row").remove();
+  });
+
+  el("saveSettingsBtn").onclick = () => {
+    const values = [...el("stagesEditor").querySelectorAll("input[data-stage-index]")]
+      .map(i => i.value.trim()).filter(Boolean);
+    if(values.length < 2) return alert("أضيفي مرحلتين على الأقل.");
+    state.stages = values;
+    const last = state.stages.length - 1;
+    state.students.forEach(s => s.stage = Math.min(s.stage,last));
+    state.sound = el("soundToggle").checked;
+    closeModal("settingsModal");
+    render();
+  };
+
+  el("exportBtn").onclick = () => {
+    const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "رحلة-الإنجاز-نسخة-احتياطية.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  el("importBtn").onclick = () => el("importFile").click();
+  el("importFile").addEventListener("change", async e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    try{
+      const data = JSON.parse(await file.text());
+      if(!Array.isArray(data.students) || !Array.isArray(data.stages)) throw new Error();
+      state = data;
+      render();
+      alert("تم استيراد البيانات بنجاح.");
+    }catch(err){
+      alert("الملف غير صالح.");
+    }
+    e.target.value = "";
+  });
+
+  document.addEventListener("click", e => {
+    const closer = e.target.closest("[data-close]");
+    if(closer) closeModal(closer.dataset.close);
+    if(e.target.classList.contains("modal")) e.target.classList.add("hidden");
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
