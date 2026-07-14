@@ -13,7 +13,7 @@ h1{margin:0;font-size:clamp(30px,5vw,48px)} .subtitle{margin:8px 0 0;color:#e2f4
 .mode{display:flex;gap:8px;background:rgba(255,255,255,.12);padding:6px;border-radius:14px} .mode button{border:0;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;background:transparent;color:#fff} .mode button.active{background:#fff;color:var(--green)}
 main{padding:24px 0 44px} .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 10px 24px rgba(7,91,69,.08)} .stat b{display:block;font-size:29px;color:var(--green);margin-top:7px} .bar{height:9px;background:#e8efec;border-radius:99px;overflow:hidden;margin-top:12px} .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--green2),var(--gold))}
-.toolbar{display:grid;grid-template-columns:1fr auto;gap:12px;margin:20px 0} .search{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:14px;font-size:16px} .actions{display:flex;gap:8px;flex-wrap:wrap}
+.meeting-panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin:18px 0;box-shadow:0 10px 24px rgba(7,91,69,.08);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.meeting-info{font-weight:800;color:var(--green);font-size:18px}.meeting-info span{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}.meeting-actions{display:flex;gap:8px;flex-wrap:wrap}.meeting-select{padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);font-weight:700}.toolbar{display:grid;grid-template-columns:1fr auto;gap:12px;margin:20px 0} .search{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:14px;font-size:16px} .actions{display:flex;gap:8px;flex-wrap:wrap}
 .btn{border:1px solid var(--line);background:#fff;color:var(--text);padding:11px 14px;border-radius:11px;font-weight:700;cursor:pointer} .btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px} .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 10px 28px rgba(7,91,69,.08)} .card.cup{border:2px solid var(--gold)}
 .name-row{display:flex;align-items:center;justify-content:space-between;gap:12px} .student{font-weight:800;font-size:20px} .book{font-size:28px;background:#fff8dc;border:1px solid #ecd78e;border-radius:14px;width:48px;height:48px;display:grid;place-items:center}
@@ -28,6 +28,7 @@ footer{padding:28px 0 36px;text-align:center} .logo{width:min(250px,60vw);height
 <header><div class="container head"><div><h1>🏆 رحلة الإنجاز</h1><p class="subtitle">طريقي إلى التميز يبدأ من هنا</p></div><div class="mode"><button id="displayBtn" class="active">👀 وضع العرض</button><button id="teacherBtn">👩‍🏫 وضع المعلمة</button></div></div></header>
 <main class="container">
 <section class="stats"><div class="stat">👩‍🎓 عدد الطالبات<b id="count">0</b></div><div class="stat">🏆 وصلن إلى الكأس<b id="cups">0</b></div><div class="stat">📈 نسبة الإنجاز<b id="rate">0%</b><div class="bar"><span id="bar" style="width:0"></span></div></div></section>
+<section class="meeting-panel"><div class="meeting-info"><span>📅 اللقاء الحالي</span><strong id="currentMeeting">الأسبوع الأول - الثلاثاء</strong></div><div class="meeting-actions teacher-only hidden"><button class="btn" id="prevMeeting">⬅️ اللقاء السابق</button><select id="meetingSelect" class="meeting-select"></select><button class="btn primary" id="nextMeeting">اللقاء التالي ➡️</button></div></section>
 <div class="toolbar"><input id="search" class="search" placeholder="ابحثي عن طالبة..."><div class="actions teacher-only hidden"><button class="btn primary" id="addBtn">➕ إضافة طالبة</button><button class="btn" id="exportBtn">📤 تصدير</button><button class="btn" id="importBtn">📥 استيراد</button><input type="file" id="importFile" accept=".json" hidden></div></div>
 <section id="grid" class="grid"></section>
 </main>
@@ -38,22 +39,50 @@ footer{padding:28px 0 36px;text-align:center} .logo{width:min(250px,60vw);height
 <script>
 (()=>{
 const names=["آمنة العميمي","أسماء آل علي","حصة الكعبي","حصة ماجد","حصة ناصر","حليمة العامري","دانة الطنيجي","زلفا الكعبي","شما المرزوقي","عائشة الحوسني","عائشة العزيزي","غاية محمد","مريم الزعابي","مريم المهري","نورة الشامسي","نوف عيسى","هند الحمودي"];
-const steps=["الأسبوع الأول - الثلاثاء","الأسبوع الأول - الخميس","الأسبوع الثاني - الثلاثاء","الأسبوع الثاني - الخميس","الأسبوع الثالث - الثلاثاء","الأسبوع الثالث - الخميس","الكأس"];
+const MEETINGS=["الأسبوع الأول - الثلاثاء","الأسبوع الأول - الخميس","الأسبوع الثاني - الثلاثاء","الأسبوع الثاني - الخميس","الأسبوع الثالث - الثلاثاء","الأسبوع الثالث - الخميس"];
 const TASKS=['الحفظ الجديد','السرد القديم','الاستماع للقارئ','قراءة السورة ×10','حضور الدرس'];
 const KEY='journey-simple-v3'; let teacher=false;
-let data=(()=>{try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.students))return x}catch(e){}return {students:names.map((name,i)=>({id:Date.now()+i,name,step:0,tasks:[false,false,false,false,false]}))}})();
+const blankTasks=()=>[false,false,false,false,false];
+const blankHistory=()=>MEETINGS.map(()=>blankTasks());
+let data=(()=>{try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.students))return x}catch(e){}return {currentMeeting:0,students:names.map((name,i)=>({id:Date.now()+i,name,meetingTasks:blankHistory()}))}})();
 const $=id=>document.getElementById(id); const save=()=>localStorage.setItem(KEY,JSON.stringify(data)); const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-function normalize(){data.students.forEach(s=>{if(!Array.isArray(s.tasks)||s.tasks.length!==5)s.tasks=[false,false,false,false,false];if(typeof s.step!=='number')s.step=0})}
-function render(){normalize();const q=$('search').value.trim().toLowerCase();const list=data.students.filter(s=>s.name.toLowerCase().includes(q));$('count').textContent=data.students.length;const cups=data.students.filter(s=>s.step===6).length;$('cups').textContent=cups;const earned=data.students.reduce((a,s)=>a+(Math.min(s.step,6)*5)+(s.step<6?s.tasks.filter(Boolean).length:0),0);const possible=Math.max(1,data.students.length*30);const rate=data.students.length?Math.round(earned/possible*100):0;$('rate').textContent=rate+'%';$('bar').style.width=rate+'%';$('grid').innerHTML=list.map(card).join('');document.querySelectorAll('.teacher-only').forEach(x=>x.classList.toggle('hidden',!teacher));save();}
+function normalize(){
+ if(!Number.isInteger(data.currentMeeting)||data.currentMeeting<0||data.currentMeeting>=MEETINGS.length)data.currentMeeting=0;
+ data.students.forEach(s=>{
+   if(!Array.isArray(s.meetingTasks)||s.meetingTasks.length!==MEETINGS.length){
+     const h=blankHistory();
+     if(Array.isArray(s.tasks)&&s.tasks.length===5){const oldStep=Math.max(0,Math.min(5,Number(s.step)||0));h[oldStep]=s.tasks.map(Boolean)}
+     s.meetingTasks=h;
+   }
+   s.meetingTasks=s.meetingTasks.map(row=>Array.isArray(row)&&row.length===5?row.map(Boolean):blankTasks());
+ });
+}
+function meetingComplete(s,idx){return s.meetingTasks[idx].every(Boolean)}
+function wonCup(s){return s.meetingTasks.every(row=>row.every(Boolean))}
+function render(){
+ normalize();
+ $('currentMeeting').textContent=MEETINGS[data.currentMeeting];
+ $('meetingSelect').innerHTML=MEETINGS.map((m,i)=>`<option value="${i}" ${i===data.currentMeeting?'selected':''}>${esc(m)}</option>`).join('');
+ const q=$('search').value.trim().toLowerCase();const list=data.students.filter(s=>s.name.toLowerCase().includes(q));
+ $('count').textContent=data.students.length;const cups=data.students.filter(wonCup).length;$('cups').textContent=cups;
+ const earned=data.students.reduce((a,s)=>a+s.meetingTasks.flat().filter(Boolean).length,0);const possible=Math.max(1,data.students.length*30);const rate=data.students.length?Math.round(earned/possible*100):0;$('rate').textContent=rate+'%';$('bar').style.width=rate+'%';
+ $('grid').innerHTML=list.map(card).join('');document.querySelectorAll('.teacher-only').forEach(x=>x.classList.toggle('hidden',!teacher));save();
+}
 function card(s){
- const day=(idx,label)=>`<span class="day ${idx<s.step?'done':idx===s.step?'current':''}">${label}</span>`;
- const taskItems=TASKS.map((label,i)=>`<button type="button" class="task ${s.tasks[i]?'done':''} ${teacher&&s.step<6?'teacher-task':''}" data-task="${i}" data-id="${s.id}" ${(!teacher||s.step===6)?'disabled':''}>${esc(label)}</button>`).join('');
- const doneCount=s.tasks.filter(Boolean).length;
- return `<article class="card ${s.step===6?'cup':''}"><div class="name-row"><div><div class="student">${esc(s.name)}</div><div style="color:#6f817b;font-size:13px;margin-top:4px">${esc(steps[s.step])}</div></div><div class="book">📖</div></div><div class="weeks"><div class="week"><div class="week-title">الأسبوع الأول</div><div class="days">${day(0,'الثلاثاء')}${day(1,'الخميس')}</div></div><div class="week"><div class="week-title">الأسبوع الثاني</div><div class="days">${day(2,'الثلاثاء')}${day(3,'الخميس')}</div></div><div class="week"><div class="week-title">الأسبوع الثالث</div><div class="days">${day(4,'الثلاثاء')}${day(5,'الخميس')}</div></div></div>${s.step<6?`<div class="tasks-title">مهام اللقاء الحالي</div><div class="tasks">${taskItems}</div><div class="tasks-note">تم إنجاز ${doneCount} من 5</div>`:''}<div class="cup-step ${s.step===6?'active':''}">🏆</div><div class="controls teacher-only hidden"><button class="btn primary" data-act="next" data-id="${s.id}" ${s.step<6&&doneCount<5?'disabled title="أكملي المهام الخمس أولًا"':''}>➕ اللقاء التالي</button><button class="btn" data-act="prev" data-id="${s.id}">➖ السابق</button><button class="btn" data-act="reset" data-id="${s.id}">🔄 البداية</button></div></article>`}
+ const day=(idx,label)=>`<span class="day ${meetingComplete(s,idx)?'done':''} ${idx===data.currentMeeting?'current':''}">${label}</span>`;
+ const current=s.meetingTasks[data.currentMeeting];
+ const taskItems=TASKS.map((label,i)=>`<button type="button" class="task ${current[i]?'done':''} ${teacher?'teacher-task':''}" data-task="${i}" data-id="${s.id}" ${!teacher?'disabled':''}>${esc(label)}</button>`).join('');
+ const doneCount=current.filter(Boolean).length;const cup=wonCup(s);
+ return `<article class="card ${cup?'cup':''}"><div class="name-row"><div><div class="student">${esc(s.name)}</div><div style="color:#6f817b;font-size:13px;margin-top:4px">${esc(MEETINGS[data.currentMeeting])}</div></div><div class="book">📖</div></div><div class="weeks"><div class="week"><div class="week-title">الأسبوع الأول</div><div class="days">${day(0,'الثلاثاء')}${day(1,'الخميس')}</div></div><div class="week"><div class="week-title">الأسبوع الثاني</div><div class="days">${day(2,'الثلاثاء')}${day(3,'الخميس')}</div></div><div class="week"><div class="week-title">الأسبوع الثالث</div><div class="days">${day(4,'الثلاثاء')}${day(5,'الخميس')}</div></div></div><div class="tasks-title">مهام اللقاء الحالي</div><div class="tasks">${taskItems}</div><div class="tasks-note">تم إنجاز ${doneCount} من 5</div><div class="cup-step ${cup?'active':''}">🏆</div><div class="controls teacher-only hidden"><button class="btn" data-act="clear" data-id="${s.id}">🔄 مسح مهام اللقاء</button></div></article>`
+}
+function changeMeeting(idx){data.currentMeeting=Math.max(0,Math.min(MEETINGS.length-1,idx));render()}
 $('displayBtn').onclick=()=>{teacher=false;$('displayBtn').classList.add('active');$('teacherBtn').classList.remove('active');render()};$('teacherBtn').onclick=()=>$('passwordModal').classList.remove('hidden');
 $('loginBtn').onclick=()=>{if($('password').value==='2026'){teacher=true;$('passwordModal').classList.add('hidden');$('teacherBtn').classList.add('active');$('displayBtn').classList.remove('active');$('password').value='';render()}else alert('كلمة المرور غير صحيحة')};
-$('grid').onclick=e=>{if(!teacher)return;const t=e.target.closest('[data-task]');if(t){const s=data.students.find(x=>x.id==t.dataset.id);if(!s||s.step===6)return;s.tasks[Number(t.dataset.task)]=!s.tasks[Number(t.dataset.task)];render();return}const b=e.target.closest('[data-act]');if(!b)return;const s=data.students.find(x=>x.id==b.dataset.id);if(!s)return;const before=s.step;if(b.dataset.act==='next'){if(s.step<6&&!s.tasks.every(Boolean))return alert('أكملي المهام الخمس أولًا');s.step=Math.min(6,s.step+1);s.tasks=[false,false,false,false,false]}if(b.dataset.act==='prev'){s.step=Math.max(0,s.step-1);s.tasks=[false,false,false,false,false]}if(b.dataset.act==='reset'){s.step=0;s.tasks=[false,false,false,false,false]}render();if(before<6&&s.step===6){$('winner').textContent=s.name;$('celebration').classList.remove('hidden')}};
-$('search').oninput=render;$('addBtn').onclick=()=>$('addModal').classList.remove('hidden');$('saveStudent').onclick=()=>{const n=$('newName').value.trim();if(!n)return alert('اكتبي اسم الطالبة');data.students.push({id:Date.now(),name:n,step:0,tasks:[false,false,false,false,false]});$('newName').value='';$('addModal').classList.add('hidden');render()};
+$('nextMeeting').onclick=()=>{if(data.currentMeeting<MEETINGS.length-1)changeMeeting(data.currentMeeting+1);else if(confirm('انتهى الأسبوع الثالث. هل تريدين العودة إلى الأسبوع الأول - الثلاثاء؟'))changeMeeting(0)};
+$('prevMeeting').onclick=()=>changeMeeting(data.currentMeeting-1);
+$('meetingSelect').onchange=e=>changeMeeting(Number(e.target.value));
+$('grid').onclick=e=>{if(!teacher)return;const t=e.target.closest('[data-task]');if(t){const s=data.students.find(x=>x.id==t.dataset.id);if(!s)return;const i=Number(t.dataset.task);s.meetingTasks[data.currentMeeting][i]=!s.meetingTasks[data.currentMeeting][i];const justWon=wonCup(s);render();if(justWon){$('winner').textContent=s.name;$('celebration').classList.remove('hidden')}return}const b=e.target.closest('[data-act]');if(!b)return;const s=data.students.find(x=>x.id==b.dataset.id);if(!s)return;if(b.dataset.act==='clear'){if(confirm('مسح مهام هذه الطالبة في اللقاء الحالي؟'))s.meetingTasks[data.currentMeeting]=blankTasks()}render()};
+$('search').oninput=render;$('addBtn').onclick=()=>$('addModal').classList.remove('hidden');$('saveStudent').onclick=()=>{const n=$('newName').value.trim();if(!n)return alert('اكتبي اسم الطالبة');data.students.push({id:Date.now(),name:n,meetingTasks:blankHistory()});$('newName').value='';$('addModal').classList.add('hidden');render()};
 $('exportBtn').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='رحلة-الإنجاز-نسخة-احتياطية.json';a.click();URL.revokeObjectURL(a.href)};$('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{try{const x=JSON.parse(await e.target.files[0].text());if(!Array.isArray(x.students))throw 0;data=x;render();alert('تم الاستيراد')}catch(err){alert('الملف غير صالح')}e.target.value=''};
 document.addEventListener('click',e=>{const c=e.target.closest('[data-close]');if(c)$(c.dataset.close).classList.add('hidden');if(e.target.classList.contains('modal'))e.target.classList.add('hidden')});render();
 })();
