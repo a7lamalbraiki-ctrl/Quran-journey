@@ -39,13 +39,13 @@ footer{padding:28px 0 36px;text-align:center} .logo{width:min(250px,60vw);height
 <div id="celebration" class="modal hidden"><div class="modal-box"><div class="celebrate">🏆🎉</div><h2>وصلتِ إلى كأس الأسبوع، هنيئًا لكِ هذا الإنجاز</h2><p id="winner"></p><button class="btn primary" data-close="celebration">إغلاق</button></div></div>
 <script>
 (()=>{
-const names=["آمنة العميمي","أسماء آل علي","حصة الكعبي","حصة ماجد","حصة ناصر","حليمة العامري","دانة الطنيجي","زلفا الكعبي","شما المرزوقي","عائشة الحوسني","عائشة العزيزي","غاية محمد","مريم الزعابي","مريم المهري","نورة الشامسي","نوف عيسى","هند الحمودي"];
+const names=["آمنة العميمي","أسماء آل علي","حصة الكعبي","حصة ماجد","حصة ناصر","دانة الطنيجي","زلفا الكعبي","عائشة الحوسني","عائشة العزيزي","غاية محمد","مريم الزعابي","مريم المهري","نورة الشامسي","نوف عيسى","هند الحمودي"];
 const DAYS=['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
-const MEETINGS=[...DAYS.map(day=>`الأسبوع الأول - ${day}`),...DAYS.map(day=>`الأسبوع الثاني - ${day}`)];
+const MEETINGS=[...DAYS.map(day=>`الأسبوع الأول - ${day}`)];
 const BASE_TASKS=['الحفظ الجديد','السرد القديم','الاستماع للقارئ','قراءة السورة ×10'];
 const ATTENDANCE='حضور الدرس';
-const KEY='journey-simple-v5';
-const OLD_KEYS=['journey-simple-v4','journey-simple-v3'];
+const KEY='journey-simple-v6-one-week';
+const OLD_KEYS=['journey-simple-v5','journey-simple-v4','journey-simple-v3'];
 let teacher=false;
 const tasksForMeeting=idx=>{
   const day=DAYS[idx%DAYS.length];
@@ -56,7 +56,7 @@ const blankHistory=()=>MEETINGS.map((_,idx)=>blankTasks(idx));
 function loadData(){
   try{
     const current=JSON.parse(localStorage.getItem(KEY));
-    if(current&&Array.isArray(current.students))return current;
+    if(current&&Array.isArray(current.students)){current.students=current.students.filter(s=>!['حليمة العامري','شما المرزوقي'].includes(s.name));return current;}
   }catch(e){}
   for(const oldKey of OLD_KEYS){
     try{
@@ -64,7 +64,7 @@ function loadData(){
       if(old&&Array.isArray(old.students)){
         return {
           currentMeeting:Math.max(0,Math.min(MEETINGS.length-1,Number(old.currentMeeting)||0)),
-          students:old.students.map((s,i)=>{
+          students:old.students.filter(s=>!['حليمة العامري','شما المرزوقي'].includes(s.name)).map((s,i)=>{
             const history=blankHistory();
             if(Array.isArray(s.meetingTasks)){
               history.forEach((row,idx)=>{
@@ -102,7 +102,7 @@ function weekComplete(s,weekIndex){
   const start=weekIndex*DAYS.length;
   return s.meetingTasks.slice(start,start+DAYS.length).every(row=>row.every(Boolean));
 }
-function wonCup(s){return weekComplete(s,0)||weekComplete(s,1)}
+function wonCup(s){return weekComplete(s,0)}
 function render(){
   normalize();
   $('currentMeeting').textContent=MEETINGS[data.currentMeeting];
@@ -129,20 +129,19 @@ function card(s){
   const taskItems=currentTasks.map((label,i)=>`<button type="button" class="task ${current[i]?'done':''} ${teacher?'teacher-task':''}" data-task="${i}" data-id="${s.id}" ${!teacher?'disabled':''}>${esc(label)}</button>`).join('');
   const doneCount=current.filter(Boolean).length;
   const cup1=weekComplete(s,0);
-  const cup2=weekComplete(s,1);
-  const cup=cup1||cup2;
+  const cup=cup1;
   const weekBlock=(weekIndex,title)=>{
     const offset=weekIndex*DAYS.length;
     const complete=weekComplete(s,weekIndex);
     return `<div class="week ${complete?'week-complete':''}"><div class="week-title">${title}</div><div class="days">${DAYS.map((label,i)=>day(offset+i,label)).join('')}</div><div class="weekly-cup ${complete?'active':''}">🏆 <span>${complete?'كأس الأسبوع':'كأس الأسبوع'}</span></div></div>`;
   };
-  return `<article class="card ${cup?'cup':''}"><div class="name-row"><div><div class="student">${esc(s.name)}</div><div style="color:#6f817b;font-size:13px;margin-top:4px">${esc(MEETINGS[data.currentMeeting])}</div></div><div class="book">📖</div></div><div class="weeks">${weekBlock(0,'الأسبوع الأول')}${weekBlock(1,'الأسبوع الثاني')}</div><div class="tasks-title">مهام اللقاء الحالي</div><div class="tasks">${taskItems}</div><div class="tasks-note">تم إنجاز ${doneCount} من ${currentTasks.length}${currentTasks.includes(ATTENDANCE)?' — حضور الدرس متاح اليوم':''}</div><div class="cup-step ${cup?'active':''}">${cup1?'🏆':''}${cup2?'🏆':''}</div><div class="controls teacher-only hidden"><button class="btn" data-act="clear" data-id="${s.id}">🔄 مسح مهام اللقاء</button></div></article>`;
+  return `<article class="card ${cup?'cup':''}"><div class="name-row"><div><div class="student">${esc(s.name)}</div><div style="color:#6f817b;font-size:13px;margin-top:4px">${esc(MEETINGS[data.currentMeeting])}</div></div><div class="book">📖</div></div><div class="weeks">${weekBlock(0,'الأسبوع الأول')}</div><div class="tasks-title">مهام اللقاء الحالي</div><div class="tasks">${taskItems}</div><div class="tasks-note">تم إنجاز ${doneCount} من ${currentTasks.length}${currentTasks.includes(ATTENDANCE)?' — حضور الدرس متاح اليوم':''}</div><div class="cup-step ${cup?'active':''}">${cup1?'🏆':''}</div><div class="controls teacher-only hidden"><button class="btn" data-act="clear" data-id="${s.id}">🔄 مسح مهام اللقاء</button></div></article>`;
 }
 function changeMeeting(idx){data.currentMeeting=Math.max(0,Math.min(MEETINGS.length-1,idx));render()}
 $('displayBtn').onclick=()=>{teacher=false;$('displayBtn').classList.add('active');$('teacherBtn').classList.remove('active');render()};
 $('teacherBtn').onclick=()=>$('passwordModal').classList.remove('hidden');
 $('loginBtn').onclick=()=>{if($('password').value==='2026'){teacher=true;$('passwordModal').classList.add('hidden');$('teacherBtn').classList.add('active');$('displayBtn').classList.remove('active');$('password').value='';render()}else alert('كلمة المرور غير صحيحة')};
-$('nextMeeting').onclick=()=>{if(data.currentMeeting<MEETINGS.length-1)changeMeeting(data.currentMeeting+1);else if(confirm('انتهى الأسبوع الثاني. هل تريدين العودة إلى الأسبوع الأول - السبت؟'))changeMeeting(0)};
+$('nextMeeting').onclick=()=>{if(data.currentMeeting<MEETINGS.length-1)changeMeeting(data.currentMeeting+1);else if(confirm('انتهى الأسبوع. هل تريدين العودة إلى الأسبوع الأول - السبت؟'))changeMeeting(0)};
 $('prevMeeting').onclick=()=>changeMeeting(data.currentMeeting-1);
 $('meetingSelect').onchange=e=>changeMeeting(Number(e.target.value));
 $('grid').onclick=e=>{
